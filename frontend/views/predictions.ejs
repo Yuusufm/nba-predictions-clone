@@ -99,85 +99,62 @@
       }
 
       // Function to fetch prediction for a matchup with retry logic
-      function fetchPrediction(team1, team2, cardElement, retryCount = 0) {
-        const predictionText = cardElement.querySelector('.prediction-text');
-        const loadingMessages = [
-          "Analyzing team matchups...",
-          "Calculating player efficiency ratings...",
-          "Evaluating home court advantage...",
-          "Processing historical head-to-head data...",
-          "Factoring in recent team performance...",
-          "Considering injury reports...",
-          "Running prediction algorithms...",
-          "Finalizing win probability..."
-        ];
-        
-        // Start the loading animation with cycling messages
-        let messageIndex = 0;
-        const loadingInterval = setInterval(() => {
-          predictionText.textContent = loadingMessages[messageIndex];
-          messageIndex = (messageIndex + 1) % loadingMessages.length;
-        }, 1500);
-        
-        // Fetch the prediction
-        fetch(`/api/predict?teams=${team1},${team2}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            // Clear the loading interval
-            clearInterval(loadingInterval);
-            
-            // Extract the prediction percentage if present in the analysis
-            // This is a simple regex to find percentages in text
-            const percentageMatch = data.prediction.match(/\((\d+)%\s*chance\)/);
-            let percentage = percentageMatch ? percentageMatch[1] : null;
-            
-            // Determine the projected winner from the response
-            let projectedWinner;
-            if (data.prediction.toLowerCase().includes(`${team1.toLowerCase()} will win`)) {
-              projectedWinner = team1;
-            } else if (data.prediction.toLowerCase().includes(`${team2.toLowerCase()} will win`)) {
-              projectedWinner = team2;
-            } else if (percentage && percentageMatch.index > data.prediction.toLowerCase().indexOf(team1.toLowerCase())) {
-              projectedWinner = team1;
-            } else {
-              projectedWinner = team2;
-            }
-            
-            // If we didn't find a percentage, estimate one based on the analysis sentiment
-            if (!percentage) {
-              percentage = Math.floor(Math.random() * 20) + 55; // Random between 55-75%
-            }
-            
-            // Update the card with the prediction
-            predictionText.textContent = `Projected Winner: ${projectedWinner} (${percentage}% chance)`;
-            
-            // Add the analysis
-            const analysisContainer = cardElement.querySelector('.analysis-container');
-            const analysisText = cardElement.querySelector('.analysis-text');
-            analysisText.textContent = data.prediction;
-            analysisContainer.style.display = 'block';
-          })
-          .catch(error => {
-            // Clear the loading interval
-            clearInterval(loadingInterval);
-            
-            console.error('Error fetching prediction:', error);
-            
-            // Retry logic - try up to 2 more times with increasing delays
-            if (retryCount < 2) {
-              predictionText.textContent = `Recalculating... (retry ${retryCount + 1})`;
-              setTimeout(() => {
-                fetchPrediction(team1, team2, cardElement, retryCount + 1);
-              }, 2000 * (retryCount + 1));
-            } else {
-              predictionText.textContent = `Unable to generate prediction. Please try again later.`;
-            }
-          });
+      async function fetchPrediction(team1, team2, cardElement, retryCount = 0) {
+        try {
+          const response = await fetch(`/api/prediction?team1=${team1}&team2=${team2}`);
+          
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          // Extract the prediction percentage if present in the analysis
+          // This is a simple regex to find percentages in text
+          const percentageMatch = data.prediction.match(/\((\d+)%\s*chance\)/);
+          let percentage = percentageMatch ? percentageMatch[1] : null;
+          
+          // Determine the projected winner from the response
+          let projectedWinner;
+          if (data.prediction.toLowerCase().includes(`${team1.toLowerCase()} will win`)) {
+            projectedWinner = team1;
+          } else if (data.prediction.toLowerCase().includes(`${team2.toLowerCase()} will win`)) {
+            projectedWinner = team2;
+          } else if (percentage && percentageMatch.index > data.prediction.toLowerCase().indexOf(team1.toLowerCase())) {
+            projectedWinner = team1;
+          } else {
+            projectedWinner = team2;
+          }
+          
+          // If we didn't find a percentage, estimate one based on the analysis sentiment
+          if (!percentage) {
+            percentage = Math.floor(Math.random() * 20) + 55; // Random between 55-75%
+          }
+          
+          // Update the card with the prediction
+          const predictionText = cardElement.querySelector('.prediction-text');
+          predictionText.textContent = `Projected Winner: ${projectedWinner} (${percentage}% chance)`;
+          
+          // Add the analysis
+          const analysisContainer = cardElement.querySelector('.analysis-container');
+          const analysisText = cardElement.querySelector('.analysis-text');
+          analysisText.textContent = data.prediction;
+          analysisContainer.style.display = 'block';
+          
+        } catch (error) {
+          console.error('Error fetching prediction:', error);
+          const predictionText = cardElement.querySelector('.prediction-text');
+          
+          // Retry logic - try up to 2 more times with increasing delays
+          if (retryCount < 2) {
+            predictionText.textContent = `Loading prediction... (retry ${retryCount + 1})`;
+            setTimeout(() => {
+              fetchPrediction(team1, team2, cardElement, retryCount + 1);
+            }, 2000 * (retryCount + 1)); // Increasing delay: 2s, 4s
+          } else {
+            predictionText.textContent = `Error loading prediction. Please try again later.`;
+          }
+        }
       }
 
       // Initialize the page with matchup cards
