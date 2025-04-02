@@ -88,54 +88,50 @@ app.get('/teams', async (req, res) => {
 // Updated scores route without mock data
 app.get('/scores', async (req, res) => {
     try {
-        // Get date from query parameter or use current date
+        // Get the date from query parameter or use today's date as default
         let dateParam = req.query.date;
-        let date;
         
-        if (dateParam) {
-            // Parse the date from the query parameter
-            date = new Date(dateParam);
-            // Check if date is valid
-            if (isNaN(date.getTime())) {
-                date = new Date(); // Fallback to current date if invalid
-            }
-        } else {
-            date = new Date(); // Default to current date
+        // If no date is provided in the query, use today's date
+        if (!dateParam) {
+            const today = new Date();
+            dateParam = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         }
         
-        // Get games for the selected date
-        let games = await nbaScores.getGamesForDate(date);
-        games = nbaScores.formatGamesData(games);
+        // Parse the date for display and navigation
+        const date = new Date(dateParam);
         
-        // Calculate previous and next day dates
-        const prevDay = new Date(date);
-        prevDay.setDate(prevDay.getDate() - 1);
-        const nextDay = new Date(date);
-        nextDay.setDate(nextDay.getDate() + 1);
-        
-        // Format date for display
-        const displayDate = date.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
+        // Format the date for display
+        const formattedDate = date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
         
-        // Format dates for navigation
-        const prevDayParam = prevDay.toISOString().split('T')[0];
-        const nextDayParam = nextDay.toISOString().split('T')[0];
+        // Calculate previous and next day for navigation
+        const prevDay = new Date(date);
+        prevDay.setDate(date.getDate() - 1);
+        const prevDayFormatted = prevDay.toISOString().split('T')[0];
         
-        res.render('scores', { 
+        const nextDay = new Date(date);
+        nextDay.setDate(date.getDate() + 1);
+        const nextDayFormatted = nextDay.toISOString().split('T')[0];
+        
+        // Fetch games for the selected date
+        const games = await nbaScores.getGamesForDate(dateParam);
+        const formattedGames = await nbaScores.formatGamesData(games);
+        
+        res.render('scores', {
             title: 'NBA Scores',
-            scores: games,
-            date: displayDate,
-            prevDay: prevDayParam,
-            nextDay: nextDayParam
+            date: formattedDate,
+            scores: formattedGames,
+            prevDay: prevDayFormatted,
+            nextDay: nextDayFormatted
         });
     } catch (error) {
         console.error('Error in scores route:', error);
-        res.status(500).render('error', { 
-            message: 'Failed to load scores',
+        res.render('error', {
+            message: 'Unable to load scores at this time',
             error: {
                 status: 500,
                 stack: process.env.NODE_ENV === 'development' ? error.stack : ''
