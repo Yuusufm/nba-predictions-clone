@@ -57,8 +57,8 @@
     </div>
 
     <script>
-      // List of 10 NBA matchups
-      const matchups = [
+      // List of all NBA matchups
+      const allMatchups = [
         { team1: 'Lakers', team2: 'Warriors' },
         { team1: 'Bucks', team2: 'Heat' },
         { team1: 'Nets', team2: 'Celtics' },
@@ -70,6 +70,9 @@
         { team1: 'Thunder', team2: 'Timberwolves' },
         { team1: 'Kings', team2: 'Trail Blazers' }
       ];
+      
+      // Only use the first 3 matchups for better performance
+      const matchups = allMatchups.slice(0, 3);
 
       // Display current date
       const today = new Date();
@@ -95,8 +98,8 @@
         return card;
       }
 
-      // Function to fetch prediction for a matchup
-      async function fetchPrediction(team1, team2, cardElement) {
+      // Function to fetch prediction for a matchup with retry logic
+      async function fetchPrediction(team1, team2, cardElement, retryCount = 0) {
         try {
           const response = await fetch(`/api/prediction?team1=${team1}&team2=${team2}`);
           
@@ -141,7 +144,16 @@
         } catch (error) {
           console.error('Error fetching prediction:', error);
           const predictionText = cardElement.querySelector('.prediction-text');
-          predictionText.textContent = `Error loading prediction: ${error.message}`;
+          
+          // Retry logic - try up to 2 more times with increasing delays
+          if (retryCount < 2) {
+            predictionText.textContent = `Loading prediction... (retry ${retryCount + 1})`;
+            setTimeout(() => {
+              fetchPrediction(team1, team2, cardElement, retryCount + 1);
+            }, 2000 * (retryCount + 1)); // Increasing delay: 2s, 4s
+          } else {
+            predictionText.textContent = `Error loading prediction. Please try again later.`;
+          }
         }
       }
 
@@ -150,13 +162,15 @@
         const container = document.getElementById('matchups-container');
         container.innerHTML = ''; // Clear loading message
         
-        // Create all matchup cards
-        matchups.forEach(({ team1, team2 }) => {
+        // Create all matchup cards with a slight delay between fetches
+        matchups.forEach(({ team1, team2 }, index) => {
           const card = createMatchupCard(team1, team2);
           container.appendChild(card);
           
-          // Fetch prediction for this matchup
-          fetchPrediction(team1, team2, card);
+          // Add a delay between API calls to prevent overwhelming the server
+          setTimeout(() => {
+            fetchPrediction(team1, team2, card);
+          }, index * 1000); // 1 second delay between each request
         });
       });
     </script>
