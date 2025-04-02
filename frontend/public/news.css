@@ -1,0 +1,131 @@
+/* Global Styles */
+* {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Navigation Bar */
+  nav {
+    background-color: #eee;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+  }
+  nav a {
+    color: darkslategray;
+    text-decoration: none;
+    margin-right: 20px;
+    font-size: 16px;
+  }
+  nav a:hover {
+    color: #1d428a;
+  }
+  
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+    border-bottom: 4px solid #c8102e;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #1d428a;
+  }
+  
+  /* Main Container */
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    flex: 1;
+  }
+  
+  /* News Section */
+  .news-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin-bottom: 30px;
+    transition: transform 0.3s ease;
+  }
+  .news-section:hover {
+    transform: translateY(-5px);
+  }
+  .news-section h2 {
+    color: #1d428a;
+    border-bottom: 2px solid #c8102e;
+    padding-bottom: 10px;
+    margin-top: 0;
+  }
+  
+  /* News Container */
+  .news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  /* News Card */
+  .news-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  .news-card:hover {
+    transform: translateY(-5px);
+  }
+  .news-card .image-box img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  .news-card .news-content {
+    padding: 15px;
+  }
+  .news-card .news-content h3 {
+    margin-top: 0;
+    font-size: 1.3em;
+    color: #1d428a;
+  }
+  .news-card .news-content p {
+    font-size: 1em;
+    margin: 10px 0;
+  }
+  .news-card .news-content a {
+    color: #c8102e;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .news-card .news-content a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Footer */
+  footer {
+    background-color: #1d428a;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+  }
+  footer p {
+    margin: 0;
+    font-size: 0.9em;
+  }
+  

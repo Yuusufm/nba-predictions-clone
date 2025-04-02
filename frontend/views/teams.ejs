@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Teams</title>
+    <link rel="stylesheet" href="/teams.css">
+</head>
+<body>
+    <header>
+        <h1 class="header-title">NBA Teams</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Home Page</a></li>
+                <li><a href="/statistics">Statistics</a></li>
+                <li><a href="/scores" class="active">Scores</a></li>
+                <li><a href="/trending">Trending News</a></li>
+                <li><a href="/teams">Teams</a></li>
+                <li><a href="/predictions">Predictions</a></li>
+                <li><a href="/contactus">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <% if (locals.error) { %>
+        <div class="error-message">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <div class="grid-container" id="teamsGrid">
+        <% if (locals.teams && teams.length > 0) { %>
+            <% teams.forEach(team => { %>
+                <a href="/teams/<%= team.id %>" class="team-box">
+                    <img src="<%= team.logoUrl %>" alt="<%= team.fullName %> Logo">
+                    <h3><%= team.fullName %></h3>
+                    <p><%= team.conference %> - <%= team.division %></p>
+                </a>
+            <% }); %>
+        <% } %>
+    </div>
+
+    <!-- No longer needed as we're rendering server-side -->
+    <!-- <script src="/js/teams.js"></script> -->
+</body>
+</html>
